@@ -5,11 +5,14 @@ import numpy as np
 import wave, math
 from matplotlib import pyplot as plt
 
-def sampling_func(max_freq, Sampling_Freq, time,amplitude):
+
+def sampling_func(max_freq, Sampling_Freq, time,signals):
+    x2=0
     T = 1 / Sampling_Freq
     n = np.arange(0, time / T)
     nT = n * T
-    x2 = amplitude*np.sin(2 * np.pi * max_freq * nT) # Since for sampling t = nT.
+    for signal in signals:
+        x2+=signal["Amplitude"]*np.sin(2 * np.pi * signal["Frequency"] * nT)
     return nT, x2
 
 def plotting_style(x_points, y_points, style="",x2=0,y2=0):
