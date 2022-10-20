@@ -13,6 +13,12 @@ def main():
     # frequency_placeholder = st.empty()
     # amplitude_placeholder = st.empty()
 
+# import css file 
+
+    with open("style.css") as design:
+        st.markdown(f"<style>{design.read()}</style>", unsafe_allow_html=True)
+
+    
     with st.container():
         frequency = st.slider("Signal Frequency(Hz)", 0, 100, key="frequency_slider",value=0)
         amplitude= st.slider("Signal Amplitude",0,200, key="amplitude_slider",value=0)
