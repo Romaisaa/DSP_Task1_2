@@ -73,14 +73,14 @@ def main():
                                 st.session_state['Signals'] = [{ "Label":label,"Amplitude":amplitude, "Frequency":frequency}]
                             else:
                                 st.session_state.Signals.append({ "Label":label,"Amplitude":amplitude, "Frequency":frequency})
-                            frequency=frequency_placeholder.slider("Signal Frequency(Hz)",0,amplitude_range,value=0)
-                            amplitude= amplitude_placeholder.slider("Signal Amplitude",0,amplitude_range, value=0)          
+                            frequency=frequency_placeholder.slider("Signal Frequency(Hz)",0,amplitude_range,value=0, step=10)
+                            amplitude= amplitude_placeholder.slider("Signal Amplitude",0,amplitude_range, value=0,step=10)          
             with noise_addition:
                 noise_flag= st.checkbox("Add Noise to current Signal")
-                noise_range=1
+                noise_range=100
                 noise_slider_col,noise_range_col=st.columns([2,1])
                 with noise_slider_col:
-                    noise_level=st.slider("Noise Level(SNR)", 0,100, step=1, value=noise_range, disabled=not noise_flag)
+                    noise_level=st.slider("Noise Level(SNR)", -noise_range,noise_range, step=1, value=0, disabled=not noise_flag)
                 with noise_range_col:
                     noise_range=st.number_input("Noise Range", value=100, disabled=not noise_flag)
             with upload_signal:
@@ -132,6 +132,8 @@ def main():
                 f1 = lambda time_point: amplitude*np.sin(frequency*2*np.pi*time_point)
                 for signal in st.session_state.Signals:
                     sinewave += signal["Amplitude"] * np.sin(2 * np.pi * signal["Frequency"] * time_axis )
+                if noise_flag:
+                    sinewave+=helper.add_noise(noise_level)
                 trace0 = go.Scatter(
                 x = time_axis,
                 y = sinewave,
@@ -147,6 +149,16 @@ def main():
                 layout = go.Layout(title = "Signal With Sampling", xaxis = {'title':'Time'}, yaxis = {'title':'Amplitude'})
                 fig = go.Figure(data = data, layout = layout)
                 st.plotly_chart(fig,use_container_width=True)
+                if reconstruct_btn:
+                    trace2= go.Scatter(
+                        x=time_axis,
+                        y= helper.reconstruction(time_axis,sampling_frequency,len(sampling_points[0]),sampling_points[1]),
+                        name= "Reconstructed Points"
+                    )
+                    data= [trace2]
+                    layout=go.Layout(title = "Reconstructed signal", xaxis = {'title':'Time'}, yaxis = {'title':'Amplitude'})
+                    fig = go.Figure(data = data, layout = layout)
+                    st.plotly_chart(fig,use_container_width=True)
 
 if __name__=="__main__":
     main()
