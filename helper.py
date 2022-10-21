@@ -4,7 +4,7 @@ import wave
 import math
 from matplotlib import pyplot as plt
 import random
-
+import plotly
 def sampling_func(Sampling_Freq, time, signals):
     x2 = 0
     T = 1 / Sampling_Freq
@@ -38,8 +38,8 @@ def reconstruction(t, frquency_rate, sample_points, y_sampled):
 
 
 def plotting_style(x_points, y_points, style="", samples_points_x=0, samples_points_y=0):
-    fig, ax = plt.subplots()
-    plt.figure(figsize=(15, 5))
+    fig, ax = plotly.subplots()
+    plotly.figure(figsize=(15, 5))
     ax.plot(x_points, y_points)
     if style == "scatter":
         ax.scatter(samples_points_x, samples_points_y)

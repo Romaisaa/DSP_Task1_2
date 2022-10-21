@@ -1,8 +1,9 @@
-from symbol import parameters
 import streamlit as st
 import numpy as np 
-import pandas as pd
 import json
+import helper 
+import plotly.graph_objects as go
+
 
 def main():
     st.set_page_config(layout="wide",page_title="Signal Sampling Studio")
@@ -13,12 +14,15 @@ def main():
     with st.container():
         labels_list=[" "]
         if 'Signals' in st.session_state:
+            empty_signals_flag=False
             for signal in st.session_state.Signals:
                 labels_list.append(signal["Label"]) 
+        else:
+            empty_signals_flag=True
         with st.expander("Signal Composer"):
             upload_signal,add_new_signal, edit_signal, noise_addition = st.tabs(["Upload new Signal","Add new Siganl", "Edit Signal", "Nosie Level"])
             with edit_signal:
-                if st.session_state.Signals!=[" "]:
+                if labels_list!=[" "]:
                     selectbox_placeholder=st.empty()
                     chosen_signal_index= selectbox_placeholder.selectbox("Choose Signal to edit", range(len(labels_list)), format_func=lambda x: labels_list[x], key="Signals selectbox")
                     if chosen_signal_index != 0 and st.session_state.Signals!=[" "] :
@@ -98,29 +102,51 @@ def main():
                 )
             else:
                 st.write("No Signals to display")
-                
+            sampling_frequency=1
             st.header("Sampling & Reconstruction")
             frequency_mode = st.selectbox("Sample Rate(HZ)",("Normailzed Frequency","Fmax")) 
             if frequency_mode=="Normailzed Frequency":
                 start=1
                 end=100
-                sampling_frequency= st.slider(" ",label_visibility="hidden" ,min_value=start, max_value=end)
+                sampling_frequency= st.slider(" ",label_visibility="hidden" ,min_value=start, max_value=end, disabled=empty_signals_flag)
             elif frequency_mode=="Fmax":
                 start=1.0
                 end = 5.0
-                s_value= st.slider(" ",label_visibility="hidden" ,min_value=start, max_value=end)
+                s_value= st.slider(" ",label_visibility="hidden" ,min_value=start, max_value=end, disabled=empty_signals_flag)
+                if empty_signals_flag:
+                    sampling_frequency=1
+                else:
+                    max_frequency =max(st.session_state.Signals, key=lambda x:x['Frequency'])["Frequency"]
+                    sampling_frequency=s_value * max_frequency
             time= st.slider("Time dispalyed (s)", 0.0, 5.0, value=1.0)
             reconstruct_btn=st.button("Reconstruct")
+            if 'Signals'  in st.session_state:
+                sampling_points=helper.sampling_func(sampling_frequency, time, st.session_state.Signals)
+            else:
+                sampling_points=[[0],[0]]
         with graphs_col:
             st.title(" ")
-            chart_data = pd.DataFrame(
-            np.random.randn(50, 3),
-            columns=["a", "b", "c"])
-            st.bar_chart(chart_data)
-            chart_data = pd.DataFrame(
-            np.random.randn(50, 3),
-            columns=["a", "b", "c"])
-            st.bar_chart(chart_data)
+            sinewave=0
+            time_axis = np.linspace(0,time,500)            
+            if 'Signals'  in st.session_state:
+                f1 = lambda time_point: amplitude*np.sin(frequency*2*np.pi*time_point)
+                for signal in st.session_state.Signals:
+                    sinewave += signal["Amplitude"] * np.sin(2 * np.pi * signal["Frequency"] * time_axis )
+                trace0 = go.Scatter(
+                x = time_axis,
+                y = sinewave,
+                name='Signal'
+                )
+                trace1 = go.Scatter(
+                x = sampling_points[0],
+                y = sampling_points[1],
+                mode = 'markers',
+                name = 'Sample Points'
+                )
+                data = [trace0, trace1]
+                layout = go.Layout(title = "Signal With Sampling", xaxis = {'title':'Time'}, yaxis = {'title':'Amplitude'})
+                fig = go.Figure(data = data, layout = layout)
+                st.plotly_chart(fig,use_container_width=True)
 
 if __name__=="__main__":
     main()
