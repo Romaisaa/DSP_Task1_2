@@ -11,7 +11,7 @@ def main():
     with open("style.css") as design:
         st.markdown(f"<style>{design.read()}</style>", unsafe_allow_html=True)
 
-    title = '<h1 class="title">Signal</h1>'
+    title = '<h1 class="h1">Signal</h1>'
     st.markdown(title,unsafe_allow_html= True)
 
     noise_flag = False
@@ -38,12 +38,6 @@ def main():
             with add_new_signal:
                 parameters_col, range_col = st.columns([2, 1])
                 with range_col:
-                    st.write(" ")
-                    st.write(" ")
-                    st.write(" ")
-                    st.write(" ")
-                    st.write(" ")
-                    st.write(" ")
                     frequency_range = st.number_input(
                         "Frequency Range", value=100)
                     amplitude_range = st.number_input(
@@ -170,7 +164,6 @@ def main():
             reconstruct_flag=st.checkbox(" Show Reconstruction graph")
 
         with graphs_col:
-            st.title(" ")
             sinewave = np.zeros(500)
             time_axis = np.linspace(0, time, 500)
             if 'Signals' in st.session_state:
