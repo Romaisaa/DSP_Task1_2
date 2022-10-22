@@ -1,4 +1,5 @@
 from select import select
+from cv2 import split
 import streamlit as st
 import numpy as np
 import json
@@ -12,7 +13,7 @@ def main():
         st.markdown(f"<style>{design.read()}</style>", unsafe_allow_html=True)
 
     title = '<h1 class="h1">Signal</h1>'
-    st.markdown(title,unsafe_allow_html= True)
+    st.markdown(title, unsafe_allow_html=True)
 
     noise_flag = False
     sampling_points = [[0], [0]]
@@ -72,6 +73,12 @@ def main():
                             amplitude = amplitude_placeholder.slider(
                                 "Signal Amplitude", 0, amplitude_range, value=0, step=10)
             with edit_signal:
+                st.header("Current Signals")
+                if "Signals" in st.session_state:
+                    st.table(st.session_state.Signals)
+
+                else:
+                    st.write("No Signals to display")
                 if labels_list != [" "]:
                     selectbox_placeholder = st.empty()
                     chosen_signal_index = selectbox_placeholder.selectbox("Choose Signal to edit", range(
@@ -118,30 +125,14 @@ def main():
                 if uploaded_file is not None and st.session_state.uploaded_file_flag:
                     uploaded_file.seek(0)
                     uploaded_signals = json.load(uploaded_file)
-                    st.session_state.Signals=uploaded_signals[0]["Signals"]
-                    noise_flag=uploaded_signals[0]["Noise_flag"]
-                    noise_level=uploaded_signals[0]["Noise_Value"]
-                    st.session_state[ "uploaded_file_flag"]= False
-                    
-
+                    st.session_state.Signals = uploaded_signals[0]["Signals"]
+                    noise_flag = uploaded_signals[0]["Noise_flag"]
+                    noise_level = uploaded_signals[0]["Noise_Value"]
+                    st.session_state["uploaded_file_flag"] = False
 
     with st.container():
         data_col, graphs_col = st.columns([1, 2], gap="medium")
         with data_col:
-            st.header("Current Signals")
-            if "Signals" in st.session_state:
-                st.table(st.session_state.Signals)
-                saved_data_structure = [
-                    {"Noise_flag": noise_flag, "Noise_Value": noise_level, "Signals": st.session_state.Signals}]
-                data_json_string = json.dumps(saved_data_structure)
-                save_signals_btn = st.download_button(
-                    label="Download Current Signal",
-                    file_name="data.json",
-                    mime="application/json",
-                    data=data_json_string,
-                )
-            else:
-                st.write("No Signals to display")
             sampling_frequency = 1
             st.header("Sampling & Reconstruction")
             frequency_mode = st.selectbox(
@@ -159,9 +150,19 @@ def main():
                 if empty_signals_flag:
                     sampling_frequency = 1
                 else:
-                    sampling_frequency=s_value * max_frequency
-            time= st.slider("Time dispalyed (s)", 0.0, 5.0, value=1.0)
-            reconstruct_flag=st.checkbox(" Show Reconstruction graph")
+                    sampling_frequency = s_value * max_frequency
+            time = st.slider("Time dispalyed (s)", 0.0, 5.0, value=1.0)
+            reconstruct_flag = st.checkbox(" Show Reconstruction graph")
+
+            saved_data_structure = [
+                {"Noise_flag": noise_flag, "Noise_Value": noise_level, "Signals": st.session_state.Signals}]
+            data_json_string = json.dumps(saved_data_structure)
+            save_signals_btn = st.download_button(
+                label="Download Current Signal",
+                file_name="data.json",
+                mime="application/json",
+                data=data_json_string,
+            )
 
         with graphs_col:
             sinewave = np.zeros(500)
@@ -171,8 +172,11 @@ def main():
                     sinewave += signal["Amplitude"] * \
                         np.sin(2 * np.pi * signal["Frequency"] * time_axis)
                 if noise_flag:
-                    sinewave+=helper.add_noise(noise_level)
-                sampling_points=helper.sampling_func(sampling_frequency, time_axis, sinewave,time)
+                    sinewave += helper.add_noise(noise_level)
+                sampling_points = helper.sampling_func(
+                    sampling_frequency, time_axis, sinewave, time)
+
+            # plot signal and sampling points only
             trace0 = go.Scatter(
                 x=time_axis,
                 y=sinewave,
@@ -184,21 +188,41 @@ def main():
                 mode='markers',
                 name='Sample Points'
             )
-            data = [trace0, trace1]
-            layout = go.Layout(title = "Signal With Sampling", xaxis = {'title':'Time'}, yaxis = {'title':'Amplitude'})
-            fig = go.Figure(data = data, layout = layout)
-            st.plotly_chart(fig,use_container_width=True)
+            signal_points = [trace0, trace1]
+            signal_points_layout = go.Layout(title="Signal With Sampling", xaxis={
+                'title': 'Time'}, yaxis={'title': 'Amplitude'})
+
+            # plot the signal with sampling points and reconstructed signal
+            trace2 = go.Scatter(
+                x=time_axis,
+                y=helper.reconstruction(time_axis, sampling_frequency, len(
+                    sampling_points[0]), sampling_points[1]),
+                name="Reconstructed Points"
+            )
+            signal_sampled = [trace0, trace1, trace2]
+            signal_sampled_layout = go.Layout(title="Reconstructed signal", xaxis={
+                'title': 'Time'}, yaxis={'title': 'Amplitude'})
+
+            # detremine to show reconstructed signal or the signal only
             if reconstruct_flag:
-                trace2= go.Scatter(
-                    x=time_axis,
-                    y=helper.reconstruction(time_axis, sampling_frequency, len(
-                        sampling_points[0]), sampling_points[1]),
-                    name="Reconstructed Points"
-                )
-                data= [trace0,trace1,trace2]
-                layout=go.Layout(title = "Reconstructed signal", xaxis = {'title':'Time'}, yaxis = {'title':'Amplitude'})
-                fig = go.Figure(data = data, layout = layout)
-                st.plotly_chart(fig,use_container_width=True) 
+                split_falg = st.checkbox(" Split the graph")
+                if split_falg:
+                    fig = go.Figure(data=signal_points,
+                                    layout=signal_points_layout)
+                    st.plotly_chart(fig, use_container_width=True)
+                    fig = go.Figure(data=signal_sampled,
+                                    layout=signal_sampled_layout)
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    fig = go.Figure(data=signal_sampled,
+                                    layout=signal_sampled_layout)
+                    st.plotly_chart(fig, use_container_width=True)
+
+            else:
+                fig = go.Figure(data=signal_points,
+                                layout=signal_points_layout)
+                st.plotly_chart(fig, use_container_width=True)
+
 
 if __name__ == "__main__":
     main()
