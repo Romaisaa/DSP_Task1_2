@@ -108,7 +108,6 @@ def main():
                     
 
 
-
     with st.container():
         data_col, graphs_col = st.columns([1,2],gap="medium")
         with data_col:
@@ -141,9 +140,7 @@ def main():
                 else:
                     sampling_frequency=s_value * max_frequency
             time= st.slider("Time dispalyed (s)", 0.0, 5.0, value=1.0)
-            reconstruct_btn=st.button("Reconstruct")
-            if 'Signals'  in st.session_state:
-                sampling_points=helper.sampling_func(sampling_frequency, time, st.session_state.Signals)
+            reconstruct_flag=st.checkbox(" Show Reconstruction graph")
 
         with graphs_col:
             st.title(" ")
@@ -154,7 +151,7 @@ def main():
                     sinewave += signal["Amplitude"] * np.sin(2 * np.pi * signal["Frequency"] * time_axis )
                 if noise_flag:
                     sinewave+=helper.add_noise(noise_level)
-                    # sampling_points=helper.sampling_func(time_axis,sine)
+                sampling_points=helper.sampling_func(sampling_frequency, time_axis, sinewave,time)
             trace0 = go.Scatter(
             x = time_axis,
             y = sinewave,
@@ -170,16 +167,16 @@ def main():
             layout = go.Layout(title = "Signal With Sampling", xaxis = {'title':'Time'}, yaxis = {'title':'Amplitude'})
             fig = go.Figure(data = data, layout = layout)
             st.plotly_chart(fig,use_container_width=True)
-            if reconstruct_btn:
+            if reconstruct_flag:
                 trace2= go.Scatter(
                     x=time_axis,
                     y= helper.reconstruction(time_axis,sampling_frequency,len(sampling_points[0]),sampling_points[1]),
                     name= "Reconstructed Points"
                 )
-                data= [trace2]
+                data= [trace0,trace1,trace2]
                 layout=go.Layout(title = "Reconstructed signal", xaxis = {'title':'Time'}, yaxis = {'title':'Amplitude'})
                 fig = go.Figure(data = data, layout = layout)
-                st.plotly_chart(fig,use_container_width=True)
+                st.plotly_chart(fig,use_container_width=True) 
 
 if __name__=="__main__":
     main()
