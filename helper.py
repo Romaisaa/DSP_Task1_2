@@ -1,10 +1,5 @@
-import matplotlib
 import numpy as np
-import wave
-import math
-from matplotlib import pyplot as plt
 import random
-import plotly
 def sampling_func(Sampling_Freq, time, signals):
     x2 = 0
     T = 1 / Sampling_Freq
