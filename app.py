@@ -17,8 +17,6 @@ def main():
 
     noise_flag = False
     sampling_points = [[0], [0]]
-    if "uploaded_file_flag" not in st.session_state:
-        st.session_state["uploaded_file_flag"] = True
     with st.container():
         labels_list = [" "]
         if 'Signals' in st.session_state:
@@ -32,7 +30,6 @@ def main():
                     "Frequency"]
         else:
             empty_signals_flag = True
-
         with st .expander("Signal Composer"):
             upload_signal, add_new_signal, edit_signal, noise_addition = st.tabs(
                 ["Upload new Signal", "Add new Siganl", "Edit Signal", "Nosie Level"])
@@ -52,14 +49,13 @@ def main():
                     amplitude_placeholder = st.empty()
                     amplitude = amplitude_placeholder.slider(
                         "Signal Amplitude", 0, amplitude_range, key="amplitude_slider", value=0)
-                if add_signal:
-                    empty_col, warning_col = st.columns([3, 1])
-                    with warning_col:
+                with range_col:
+                    if add_signal:
                         if label in labels_list:
-                            st.write(
+                            st.error(
                                 "Duplicate Label or empty label, please change")
                         elif frequency == 0 or amplitude == 0:
-                            st.write("Frequency or amplitude cannot be zero")
+                            st.error("Frequency or amplitude cannot be zero")
                         else:
                             if 'Signals' not in st.session_state:
                                 st.session_state['Signals'] = [
@@ -87,36 +83,52 @@ def main():
                         frequency_value = st.session_state.Signals[chosen_signal_index-1]["Frequency"]
                         amplitude_value = st.session_state.Signals[chosen_signal_index-1]["Amplitude"]
                         edit_col1, edit_col2 = st.columns([1, 1])
+                        with edit_col2:
+                            new_amplitude_placeholder = st.empty()
+                            new_amplitude = new_amplitude_placeholder.number_input(
+                                "New Amplitude", value=amplitude_value, step=1, key="amp_inp")
+                            update_btn_placeholder = st.empty()
+                            edit_signal_btn = update_btn_placeholder.button(
+                                "Update Signal", key="update_btn")
+                            if edit_signal_btn:
+                                st.session_state.Signals[chosen_signal_index -
+                                                         1]["Frequency"] = st.session_state.freq_btn
+                                st.session_state.Signals[chosen_signal_index -
+                                                         1]["Amplitude"] = new_amplitude
                         with edit_col1:
-                            new_frequency = st.number_input(
-                                "New Frequency", value=frequency_value, step=1)
-                            remove_signal_btn = st.button("Remove Signal")
+                            new_frequency_placeholder = st.empty()
+                            new_frequency = new_frequency_placeholder.number_input(
+                                "New Frequency", value=frequency_value, step=1, key="freq_btn")
+                            remove_btn_placeholder = st.empty()
+                            remove_signal_btn = remove_btn_placeholder.button(
+                                "Remove Signal", key="remove_btn")
                             if remove_signal_btn:
                                 st.session_state.Signals.pop(
                                     chosen_signal_index-1)
                                 labels_list.pop(chosen_signal_index)
-                                # st.experimental_rerun()
-                        with edit_col2:
-                            new_amplitude = st.number_input(
-                                "New Amplitude", value=amplitude_value, step=1)
-                            edit_signal_btn = st.button("Update Signal")
-                            if edit_signal_btn:
-                                st.session_state.Signals[chosen_signal_index -
-                                                         1]["Frequency"] = new_frequency
-                                st.session_state.Signals[chosen_signal_index -
-                                                         1]["Amplitude"] = new_amplitude
+                                selectbox_placeholder.selectbox("Choose Signal to edit", range(
+                                    len(labels_list)), format_func=lambda x: labels_list[x], index=0)
+                                new_frequency_placeholder.number_input(
+                                    "New Frequency", value=frequency_value, step=1, disabled=True)
+                                remove_btn_placeholder.button(
+                                    "Remove Signal", disabled=True)
+                                new_amplitude_placeholder.number_input(
+                                    "New Amplitude", value=amplitude_value, step=1, disabled=True)
+                                update_btn_placeholder.button(
+                                    "Update Signal", disabled=True)
+
                 else:
                     st.write("No signals are added ")
             with noise_addition:
-                noise_flag = st.checkbox("Add Noise to current Signal")
-                noise_range = 100
-                noise_slider_col, noise_range_col = st.columns([2, 1])
+                space_col, noise_checkbox_col, noise_slider_col = st.columns([
+                                                                             0.1, 0.8, 3.5])
+                with noise_checkbox_col:
+                    st.subheader(" ")
+                    noise_flag = st.checkbox("Add Noise to current Signal")
                 with noise_slider_col:
                     noise_level = st.slider(
-                        "Noise Level(SNR)", -noise_range, noise_range, step=1, value=0, disabled=not noise_flag)
-                with noise_range_col:
-                    noise_range = st.number_input(
-                        "Noise Range", value=100, disabled=not noise_flag)
+                        "Noise Level(SNR)", -100, 100, step=1, value=0, disabled=not noise_flag)
+
             with upload_signal:
                 def new_upload():
                     st.session_state["uploaded_file_flag"] = True
@@ -165,8 +177,8 @@ def main():
             )
 
         with graphs_col:
-            sinewave = np.zeros(500)
-            time_axis = np.linspace(0, time, 500)
+            sinewave = np.zeros(2000)
+            time_axis = np.linspace(0, time, 2000)
             if 'Signals' in st.session_state:
                 for signal in st.session_state.Signals:
                     sinewave += signal["Amplitude"] * \
