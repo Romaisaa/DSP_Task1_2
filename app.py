@@ -1,4 +1,3 @@
-from select import select
 import streamlit as st
 import numpy as np
 import json
