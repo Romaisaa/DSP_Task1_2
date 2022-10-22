@@ -4,3 +4,29 @@
 .js-plotly-plot .plotly .ease-bg {
   display: none;
 }
+
+.streamlit-expander button{
+  border-color: white ;
+  color: #F2AA4CFF;
+  transition: 0.7s ease;
+}
+.streamlit-expander button:hover{
+  border-color: rgb(255, 255, 255) ;
+  color: rgb(255, 255, 255);
+  /* background-color: green; */
+}
+
+/* .streamlit-expander button:focus{
+  box-shadow: rgb(0 128 0 / 50%)  0px 0.2rem 0px 0px;
+  outline: none;
+  color: rgb(255, 255, 255) !important;
+} */
+
+/* Title */
+/* .css-10trblm {
+
+} */
+
+.title {
+  color: blueviolet;
+}

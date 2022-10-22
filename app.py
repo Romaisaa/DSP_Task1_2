@@ -10,7 +10,10 @@ def main():
     st.set_page_config(layout="wide", page_title="Signal Sampling Studio")
     with open("style.css") as design:
         st.markdown(f"<style>{design.read()}</style>", unsafe_allow_html=True)
-    st.title("Signal Sampling Studio")
+
+    title = '<h1 class="title">Signal</h1>'
+    st.markdown(title,unsafe_allow_html= True)
+
     noise_flag = False
     sampling_points = [[0], [0]]
     if "uploaded_file_flag" not in st.session_state:
