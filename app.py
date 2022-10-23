@@ -13,7 +13,7 @@ def main():
     with open("style.css") as design:
         st.markdown(f"<style>{design.read()}</style>", unsafe_allow_html=True)
     title = '<h1 class="h1">Signal Sampling Studio</h1>'
-    st.markdown(title,unsafe_allow_html= True)
+    # st.markdown(title,unsafe_allow_html= True)
 
     ######### Variable intialization ########### 
     noise_flag = False
@@ -104,7 +104,7 @@ def main():
                     st.write("No signals are added ")
             ############ Noise Addition Tab ##############
             with noise_addition:
-                space_col,noise_checkbox_col,noise_slider_col = st.columns([0.1,0.8,3.5])
+                noise_checkbox_col,noise_slider_col = st.columns([1,3.5])
                 with noise_checkbox_col:
                     st.subheader(" ")
                     noise_flag = st.checkbox("Add Noise to current Signal")

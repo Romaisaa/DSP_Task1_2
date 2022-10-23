@@ -38,14 +38,13 @@
 }
 
 .css-18e3th9 {
-  padding-top: 0rem;
-  padding-left: 5rem;
-  padding-right: 5rem;
+  padding: 0rem 5rem 0rem 5rem;
 }
 
 .css-w6c5rr p {
   color: indianred;
   font-family: 'Roboto', sans-serif;
+  /* text-align: center; */
 }
 
 .h3 {
@@ -55,4 +54,20 @@
 .error_msg {
   color: indianred;
   font-family: 'Roboto', sans-serif;
+}
+
+.row-widget stButton {
+  text-align: center;
+}
+
+.css-1u1d8pp {
+  height: 10rem;
+}
+
+.css-1u1d8pp {
+  gap: 2rem;
+}
+
+.css-q6aish {
+  font-size: 1rem;
 }
