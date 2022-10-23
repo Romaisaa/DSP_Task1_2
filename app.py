@@ -10,8 +10,8 @@ def main():
     with open("style.css") as design:
         st.markdown(f"<style>{design.read()}</style>", unsafe_allow_html=True)
 
-    title = '<h1 class="h1">Signal</h1>'
-    st.markdown(title, unsafe_allow_html=True)
+    title = '<h1 class="h1">Signal Sampling Studio</h1>'
+    st.markdown(title,unsafe_allow_html= True)
 
     noise_flag = False
     sampling_points = [[0], [0]]
@@ -51,13 +51,14 @@ def main():
                     amplitude = amplitude_placeholder.slider(
                         "Signal Amplitude", 0, amplitude_range, key="amplitude_slider", value=0)
                 if add_signal:
-                    empty_col, warning_col = st.columns([3, 1])
-                    with warning_col:
+                    with range_col:
                         if label in labels_list:
                             st.write(
                                 "Duplicate Label or empty label, please change")
                         elif frequency == 0 or amplitude == 0:
-                            st.write("Frequency or amplitude cannot be zero")
+                            # st.write("Frequency or amplitude cannot be zero")
+                            error_msg = '<p class="error_msg">Frequency or amplitude cannot be zero</p>'
+                            st.markdown(error_msg,unsafe_allow_html= True)
                         else:
                             if 'Signals' not in st.session_state:
                                 st.session_state['Signals'] = [
@@ -117,31 +118,33 @@ def main():
                 if uploaded_file is not None and st.session_state.uploaded_file_flag:
                     uploaded_file.seek(0)
                     uploaded_signals = json.load(uploaded_file)
-                    st.session_state.Signals = uploaded_signals[0]["Signals"]
-                    noise_flag = uploaded_signals[0]["Noise_flag"]
-                    noise_level = uploaded_signals[0]["Noise_Value"]
-                    st.session_state["uploaded_file_flag"] = False
+                    st.session_state.Signals=uploaded_signals[0]["Signals"]
+                    noise_flag=uploaded_signals[0]["Noise_flag"]
+                    noise_level=uploaded_signals[0]["Noise_Value"]
+                    st.session_state[ "uploaded_file_flag"]= False
+                    
 
-    st.header("Current Signals")
-    if "Signals" in st.session_state:
-        st.table(st.session_state.Signals)
-        saved_data_structure = [
-            {"Noise_flag": noise_flag, "Noise_Value": noise_level, "Signals": st.session_state.Signals}]
-        data_json_string = json.dumps(saved_data_structure)
-        save_signals_btn = st.download_button(
-            label="Download Current Signal",
-            file_name="data.json",
-            mime="application/json",
-            data=data_json_string,
-        )
-    else:
-        st.write("No Signals to display")
 
     with st.container():
         data_col, graphs_col = st.columns([1, 2], gap="medium")
         with data_col:
+            st.header("Current Signals")
+            if "Signals" in st.session_state:
+                st.table(st.session_state.Signals)
+                saved_data_structure = [
+                    {"Noise_flag": noise_flag, "Noise_Value": noise_level, "Signals": st.session_state.Signals}]
+                data_json_string = json.dumps(saved_data_structure)
+                save_signals_btn = st.download_button(
+                    label="Download Current Signal",
+                    file_name="data.json",
+                    mime="application/json",
+                    data=data_json_string,
+                )
+            else:
+                st.write("No Signals to display")
             sampling_frequency = 1
-            st.header("Sampling & Reconstruction")
+            h3 = '<h3 class="h3">Sampling & Reconstruction</h3>'
+            st.markdown(h3,unsafe_allow_html= True)
             frequency_mode = st.selectbox(
                 "Sample Rate(HZ)", ("Normailzed Frequency", "Fmax"))
             if frequency_mode == "Normailzed Frequency":
