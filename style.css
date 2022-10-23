@@ -33,7 +33,13 @@
   font-family: 'Roboto', sans-serif;
 }
 
+/* Nav Dark */
 .css-1qspbsc {
+  display: none;
+}
+
+/* Nav Light */
+.css-18ni7ap {
   display: none;
 }
 

@@ -173,7 +173,7 @@ def main():
                 else:
                     sampling_frequency = s_value * max_frequency
             time = st.slider("Time dispalyed (s)", 0.0, 5.0, step=0.1,value=1.0)
-            reconstruct_flag = st.checkbox(" Show Reconstruction graph")
+
     ############### Graphs column compenets ##########
         with graphs_col:
             with st.container():
