@@ -1,11 +1,20 @@
 import numpy as np
 import random
+
+
+########### Sampling_Func#####
+# Function used to sample function points depending on sample frequencty 
+# retuen: List composed of 2 lists include sampling points as list of x_values and list of y_values
+# parameters:- 
+# Sampling_freq-> rate of sampling
+# time_points-> values of time 
+# signals_points-> values of signal at each tim coressponding to time poits
+# time-> time needed to be displayed for user(Graphing Time)       
 def sampling_func(Sampling_Freq, time_points, signals_points,time):
     total_second_points=len(time_points)/time
     sample_step_size=total_second_points/Sampling_Freq
     sampled_time=time_points[::int(sample_step_size)]
     sampled_signal=signals_points[::int(sample_step_size)]
-
     return sampled_time, sampled_signal
 
 

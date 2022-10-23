@@ -8,14 +8,19 @@ import plotly.graph_objects as go
 
 
 def main():
+    ######## Page Design Setup ###########
     st.set_page_config(layout="wide", page_title="Signal Sampling Studio")
     with open("style.css") as design:
         st.markdown(f"<style>{design.read()}</style>", unsafe_allow_html=True)
     title = '<h1 class="h1">Signal Sampling Studio</h1>'
     st.markdown(title,unsafe_allow_html= True)
+
+    ######### Variable intialization ########### 
     noise_flag = False
     sampling_points = [[0], [0]]
+
     with st.container():
+        ####### Intializing Session state variables ##########
         labels_list = [" "]
         if 'Signals' in st.session_state:
             if st.session_state.Signals == []:
@@ -28,9 +33,10 @@ def main():
         else:
             empty_signals_flag = True
 
+        ############### Expander component ############
         with st .expander("Signal Composer"):
-            upload_signal, add_new_signal, edit_signal, noise_addition = st.tabs(
-                ["Upload new Signal", "Add new Siganl", "Edit Signal", "Nosie Level"])
+            upload_signal, add_new_signal, edit_signal, noise_addition = st.tabs(["Upload new Signal", "Add new Siganl", "Edit Signal", "Nosie Level"])
+            ######### Adding new signal tab######
             with add_new_signal:
                 label = st.text_input("Signal Label")
                 parameters_col, range_col = st.columns([2, 1])
@@ -43,6 +49,8 @@ def main():
                     frequency = frequency_placeholder.slider("Signal Frequency(Hz)", 0, frequency_range, key="frequency_slider", value=0)
                     amplitude_placeholder = st.empty()
                     amplitude = amplitude_placeholder.slider("Signal Amplitude", 0, amplitude_range, key="amplitude_slider", value=0)
+
+                ########## Add signal button actions #############
                 if add_signal:
                     with range_col:
                         if label in labels_list or label =="":
@@ -60,6 +68,7 @@ def main():
                             frequency = frequency_placeholder.slider("Signal Frequency(Hz)", 0, amplitude_range, value=0, step=10)
                             amplitude = amplitude_placeholder.slider("Signal Amplitude", 0, amplitude_range, value=0, step=10)
                             empty_signals_flag=False
+            ############ Edit or Remove Signal Tab#######
             with edit_signal:
                 if labels_list != [" "]:
                     selectbox_placeholder = st.empty()
@@ -92,15 +101,16 @@ def main():
                                 update_btn_placeholder.button("Update Signal",disabled=True)
                 else:
                     st.write("No signals are added ")
+            ############ Noise Addition Tab ##############
             with noise_addition:
                 space_col,noise_checkbox_col,noise_slider_col = st.columns([0.1,0.8,3.5])
                 with noise_checkbox_col:
                     st.subheader(" ")
                     noise_flag = st.checkbox("Add Noise to current Signal")
                 with noise_slider_col:
-                    noise_level = st.slider(
-                        "Noise Level(SNR)", -100, 100, step=1, value=0, disabled=not noise_flag)
+                    noise_level = st.slider("Noise Level(SNR)", -100, 100, step=1, value=0, disabled=not noise_flag)
 
+        ############ Upload Signal Tab ############
             with upload_signal:
                 def new_upload():
                     st.session_state["uploaded_file_flag"] = True
@@ -117,6 +127,7 @@ def main():
                     except:
                         st.error("Improper File",icon="🚨")
 
+        ######### Grapghing and  Smpling Container ###################
     with st.container():
         data_col, graphs_col = st.columns([1, 2], gap="medium")
         with data_col:
@@ -136,7 +147,8 @@ def main():
                 st.write("No Signals to display")
             sampling_frequency = 1
             h3 = '<h3 class="h3">Sampling & Reconstruction</h3>'
-            st.markdown(h3,unsafe_allow_html= True)
+            st.markdown(h3,unsafe_allow_html= True) 
+            ####### sample rate scale select box handelling##########
             frequency_mode = st.selectbox(
                 "Sample Rate(HZ)", ("Normailzed Frequency, 10Hz", "Normailzed Frequency, 100Hz","Normailzed Frequency, 500Hz","Fmax"))
             if frequency_mode == "Normailzed Frequency, 10Hz":
@@ -161,34 +173,36 @@ def main():
                     sampling_frequency = s_value * max_frequency
             time = st.slider("Time dispalyed (s)", 0.0, 5.0, step=0.1,value=1.0)
             reconstruct_flag = st.checkbox(" Show Reconstruction graph")
-
+    ############### Graphs column compenets ##########
         with graphs_col:
-            sinewave = np.zeros(500)
+            main_signal = np.zeros(500)
             time_axis = np.linspace(0, time, 500)
             if 'Signals' in st.session_state:
                 for signal in st.session_state.Signals:
-                    sinewave += signal["Amplitude"] * \
+                    main_signal += signal["Amplitude"] * \
                         np.sin(2 * np.pi * signal["Frequency"] * time_axis)
                 if noise_flag:
-                    sinewave += helper.add_noise(noise_level)
+                    main_signal += helper.add_noise(noise_level)
                 sampling_points = helper.sampling_func(
-                    sampling_frequency, time_axis, sinewave, time)
-            trace0 = go.Scatter(
+                    sampling_frequency, time_axis, main_signal, time)
+            main_signal_trace = go.Scatter(
                 x=time_axis,
-                y=sinewave,
+                y=main_signal,
                 name='Signal'
             )
-            trace1 = go.Scatter(
+            sampling_point_trace = go.Scatter(
                 x=sampling_points[0],
                 y=sampling_points[1],
                 mode='markers',
                 name='Sample Points'
             )
-            data = [trace0, trace1]
+            data = [main_signal_trace, sampling_point_trace]
             layout = go.Layout(title="Signal With Sampling", xaxis={'title': 'Time'}, yaxis={'title': 'Amplitude'})
             fig = go.Figure(data=data, layout=layout)
             fig.update_layout(legend=dict(orientation= "h",yanchor="bottom",y=1.02,xanchor="right",x=1 ))
 
+
+            ################ Recontruction Graph ############
             st.plotly_chart(fig, use_container_width=True)
             if reconstruct_flag:
                 trace2 = go.Scatter(
