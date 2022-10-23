@@ -31,7 +31,8 @@ def main():
                     labels_list.append(signal["Label"])
                 max_frequency = max(st.session_state.Signals, key=lambda x: x['Frequency'])["Frequency"]
         else:
-            empty_signals_flag = True
+            st.session_state['Signals'] = [{"Label": "default_signal", "Amplitude": 1, "Frequency": 4}]
+            empty_signals_flag = False
 
         ############### Expander component ############
         with st .expander("Signal Composer"):
@@ -154,7 +155,7 @@ def main():
             if frequency_mode == "Normailzed Frequency, 10Hz":
                 start = 1
                 end = 10
-                sampling_frequency = st.slider(" ", label_visibility="hidden", min_value=start, max_value=end, disabled=empty_signals_flag)
+                sampling_frequency = st.slider(" ", label_visibility="hidden", min_value=start, max_value=end, disabled=empty_signals_flag,value=10)
             elif frequency_mode == "Normailzed Frequency, 100Hz":
                 start = 1
                 end = 100
@@ -175,6 +176,8 @@ def main():
             reconstruct_flag = st.checkbox(" Show Reconstruction graph")
     ############### Graphs column compenets ##########
         with graphs_col:
+            with st.container():
+                st.write("Note: Choose your desired signal to display by clicking its legend")
             main_signal = np.zeros(500)
             time_axis = np.linspace(0, time, 500)
             if 'Signals' in st.session_state:
@@ -196,26 +199,18 @@ def main():
                 mode='markers',
                 name='Sample Points'
             )
-            data = [main_signal_trace, sampling_point_trace]
-            layout = go.Layout(title="Signal With Sampling", xaxis={'title': 'Time'}, yaxis={'title': 'Amplitude'})
-            fig = go.Figure(data=data, layout=layout)
-            fig.update_layout(legend=dict(orientation= "h",yanchor="bottom",y=1.02,xanchor="right",x=1 ))
-
-
-            ################ Recontruction Graph ############
-            st.plotly_chart(fig, use_container_width=True)
-            if reconstruct_flag:
-                trace2 = go.Scatter(
+            reconstruct_signal = go.Scatter(
                     x=time_axis,
                     y=helper.reconstruction(time_axis, sampling_frequency, len(
                         sampling_points[0]), sampling_points[1]),
-                    name="Reconstructed Points",
+                    name="Reconstructed Signal",
                     marker = {'color' : 'green'}
                 )
-                data = [trace2]
-                layout = go.Layout(title="Reconstructed signal", xaxis={'title': 'Time'}, yaxis={'title': 'Amplitude'})
-                fig = go.Figure(data=data, layout=layout)
-                st.plotly_chart(fig, use_container_width=True)
+            data = [main_signal_trace, sampling_point_trace,reconstruct_signal]
+            layout = go.Layout(title="Signal With Sampling", xaxis={'title': 'Time'}, yaxis={'title': 'Amplitude'})
+            fig = go.Figure(data=data, layout=layout)
+            fig.update_layout(  width=500,height=750,legend=dict(orientation= "h",yanchor="bottom",y=1.02,xanchor="right",x=1 ),)
+            st.plotly_chart(fig, use_container_width=True)
 
 
 if __name__ == "__main__":
