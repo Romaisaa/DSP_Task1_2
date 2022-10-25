@@ -20,18 +20,24 @@ def sampling_func(Sampling_Freq, time_points, signals_points,time):
 
 
 def add_noise(SNR):
-    noise_amp = 0
-    if SNR >= 0:
-        noise_amp = 0.00008/(SNR+1)
+    if SNR == 0:
+        noise_amp = 1
     else:
-        noise_amp = -1 * SNR * 0.0017
-
+        noise_amp = 0.001/SNR
     noise = noise_amp * np.asarray(random.sample(range(0, 500), 500))
-
     return noise
 
-def reconstruction(t, frquency_rate, sample_points, y_sampled):
-    reconstructed_func = 0
-    for i in range(0, sample_points, 1):
-        reconstructed_func += y_sampled[i] * np.sinc(t*frquency_rate-i)
-    return reconstructed_func
+def reconstruction(time_axis, x_sampled, sample_rate):
+    if (len(x_sampled)<2):
+        return [0]
+    scalar = np.isscalar(time_axis)
+    if scalar:
+        time_axis = np.array(time_axis)
+        time_axis.resize(1)
+    u = np.resize(time_axis, (len(x_sampled), len(time_axis)))
+    v = (x_sampled - u.T) / (x_sampled[1] - x_sampled[0])
+    m = sample_rate * np.sinc(v)
+    sample_rate_at_x = np.sum(m, axis=1)
+    if scalar:
+        return float(sample_rate_at_x)
+    return sample_rate_at_x
