@@ -38,25 +38,21 @@ def main():
 
         ############### Expander component ############
         ######### Adding new signal tab######
-        upload_col,label_col, frequency_col,amplitude_col,remove_box_col,remove_btn_col  = st.columns([1.3,0.5,0.5,0.5,0.5,0.4],gap="medium")
+        upload_col,label_col, frequency_col,amplitude_col,remove_box_col= st.columns([1.5,0.6,0.6,0.6,0.6],gap="medium")
         with st.container():
             with label_col:
-                st.subheader(" ")
+                # st.subheader(" ")
                 label = st.text_input("Signal Label")
-            with frequency_col:
-                st.write("Add New Signal")
-                frequency = st.number_input("Frequency", value=1)
                 add_signal = st.button("Add Signal")
+            with frequency_col:
+                frequency = st.number_input("Frequency", value=1)
             with amplitude_col:
-                st.subheader(" ")
+                # st.subheader(" ")
                 amplitude = st.number_input("Amplitude", value=1)
         with remove_box_col:
-            st.subheader(" ")
+            # st.subheader(" ")
             selectbox_placeholder = st.empty()
             chosen_signal_index = selectbox_placeholder.selectbox("Choose Signal to remove", range(len(labels_list)), format_func=lambda x: labels_list[x], key="Signals selectbox")
-        with remove_btn_col:
-            st.subheader(" ")
-            st.subheader(" ")
             remove_btn_placeholder=st.empty()
             remove_signal_btn =remove_btn_placeholder.button("🚨 Remove Signal",key="remove_btn")
         if remove_signal_btn:
@@ -136,7 +132,8 @@ def main():
             main_signal_trace = go.Scatter(
                 x=time_axis,
                 y=main_signal,
-                name='Signal'
+                name='Signal',
+                marker = {'color' : '#5885AF'}
             )
             sampling_point_trace = go.Scatter(
                 x=sampling_points[0],
