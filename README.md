@@ -5,6 +5,7 @@
 - [Overview](#overview)
 - [Application Features](#application-features)
 - [Application Demo](#application-demo)
+- [Hosted App](#hosted-app)
 - [Run the Project](#run-the-project)
 - [Team Members](#team-2-members)
 
@@ -31,6 +32,10 @@ Signal Sampling Studio is a web application built by streamlit.io used for signa
 <p align="center">
  <img src="Assests\Application_Demo.gif"/>
 </p>
+
+## Hosted App
+
+&emsp;Application Link [HERE](https://romaisaa-dsp-task1-2-app-s8rrar.streamlitapp.com/)
 
 ## Run The project
 
