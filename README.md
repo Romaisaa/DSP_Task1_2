@@ -11,7 +11,7 @@
 
 ## Overview
 
-Signal Sampling Studio is a web application built by streamlit.io used for signal sampling and reconstruction as an application for Nyquist theory. for more details about Nyquist theory [Click Here](Samples/README.md)
+Signal Sampling Studio is a web application built by streamlit.io used for signal sampling and reconstruction as an application for Nyquist theory. for more details about Nyquist theory [Click Here](Sampling%20Cases/README.md)
 <br>
 <br>
 
