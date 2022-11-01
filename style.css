@@ -12,20 +12,6 @@
   color: black;
   transition: 0.7s ease;
 }
-/* .streamlit-expander button:hover {
-  
-} */
-
-/* .streamlit-expander button:focus{
-  box-shadow: rgb(0 128 0 / 50%)  0px 0.2rem 0px 0px;
-  outline: none;
-  color: rgb(255, 255, 255) !important;
-} */
-
-/* Title */
-/* .css-10trblm {
-
-} */
 
 .h1 {
   font-family: "Roboto", sans-serif;
@@ -48,11 +34,12 @@
 .css-w6c5rr p {
   color: indianred;
   font-family: "Roboto", sans-serif;
-  /* text-align: center; */
 }
 
 .h3 {
   font-family: "Roboto", sans-serif;
+  margin-top: 1.5rem;
+  margin-bottom: 1.3rem;
 }
 
 .error_msg {
@@ -82,7 +69,7 @@
 }
 
 .css-1ec096l {
-  height: 5rem;
+  height: 8rem;
   overflow: scroll;
 }
 
@@ -113,4 +100,12 @@ h3 {
 
 .css-4utlqy {
   font-size: 15px;
+}
+.css-6kekos edgvbvh9 {
+  margin: auto;
+}
+
+.stButton button {
+  position: absolute;
+  transform: translateX(25%);
 }

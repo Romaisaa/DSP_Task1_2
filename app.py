@@ -6,6 +6,14 @@ import pandas  as pd
 def main():
                             #___________________________Page Setup design _________________________________________#
     st.set_page_config(layout="wide", page_title="Signal Sampling Studio")
+    hide_st_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                header {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
     with open("style.css") as design:
         st.markdown(f"<style>{design.read()}</style>", unsafe_allow_html=True)
 
@@ -33,13 +41,13 @@ def main():
             st.session_state['max_frequency'] =1
             empty_signals_flag = False
                             #_______________________________upload /add / remove signals compenets and logic _____________________________________#
-        upload_col,label_col, frequency_col,amplitude_col,remove_box_col= st.columns([1.5,0.6,0.6,0.6,0.6],gap="medium")
+        upload_col,label_col, frequency_col,amplitude_col,remove_box_col= st.columns([1.2,0.6,0.6,0.6,0.6],gap="medium")
 
 
                             #__________________________Uploading/ delete uplaodied Functionality _________________________________________#
         with upload_col:
             with st.container():
-                uploaded_file = st.file_uploader("Choose a file", accept_multiple_files=False, type=['csv']) 
+                uploaded_file = st.file_uploader("Upload Signal", accept_multiple_files=False, type=['csv']) 
                 if uploaded_file is not None :
                     ## check file is proper to deal with
                     try:
@@ -66,7 +74,7 @@ def main():
                 frequency = st.number_input("Frequency(HZ)", value=1, min_value=0,max_value=500)
                 add_signal = st.button("Add Signal")
             with amplitude_col:
-                amplitude = st.number_input("Amplitude(Volt)", value=1, min_value=0,max_value=500)
+                amplitude = st.number_input("Amplitude(mV)", value=1, min_value=0,max_value=500)
 
                             ### Add new Signal Logic and validation check ###
         if add_signal:
@@ -98,10 +106,11 @@ def main():
 
                             #__________________________Graphing, Sampling,Reconstruction _________________________________________#
     with st.container():
-        data_col, graphs_col = st.columns([1, 2], gap="medium")
+        data_col, graphs_col, select_graph_col = st.columns([1, 2,0.3], gap="small")
                             #### Displaying cureent signals ####
         with data_col:
-            st.subheader("Current Signals")
+            h3 = '<h3 class="h3">Current Signals</h3>'
+            st.markdown(h3,unsafe_allow_html= True) 
             st.table(st.session_state.Signals)
             with st.container():
 
@@ -123,22 +132,30 @@ def main():
                 start = 1.0
                 end = 5.0
                 format ="%f Fmax"
-            sampling_frequency = st.slider(" ", label_visibility="hidden",min_value=start, max_value=end, step=0.1,value=2.0,disabled=empty_signals_flag,format=format)
+            sampling_frequency = st.slider(" ", label_visibility="hidden",min_value=start, max_value=end, step=0.1,value=2.1,disabled=empty_signals_flag,format=format)
             if frequency_mode==f"Fmax ={st.session_state['max_frequency']} Hz":
                 sampling_frequency = sampling_frequency * st.session_state['max_frequency']
 
                             #### displayed time Compenet ####
-            time = st.slider("Time displayed (seconds)", 0.1, 5.0, step=0.1,value=1.0,disabled=uploaded)
+            # time = st.slider("Time displayed (seconds)", 0.1, 5.0, step=0.1,value=1.0,disabled=uploaded)
+            time= 1
+                        #__________________________Graphing _________________________________________#
 
-                            #__________________________Graphing _________________________________________#
+        with select_graph_col:
+            ##_____Check selected signals to show______________##
+            st.title(" ")
+            show_main_signal=st.checkbox("Main Signal",value=True)
+            show_samples=st.checkbox("Sample Points",value=True)
+            show_reconstructed=st.checkbox("Recnstructed",value=True)
+        
         with graphs_col:
             ##_____Check if any uploaded signal to add_______________##
             if "uploaded_x" in st.session_state and st.session_state['uploaded_y'].sum() !=0:
                     time_axis=st.session_state['uploaded_x']
                     main_signal=st.session_state['uploaded_y']
             else:
-                time_axis = np.linspace(0, time, int(500*time))
-                main_signal = np.zeros(int(500*time))
+                time_axis = np.linspace(0, time, int(1500*time))
+                main_signal = np.zeros(int(1500*time))
             ##_____iterate over signals generated by signal generator to add_______________##
             if 'Signals' in st.session_state:
                 for signal in st.session_state.Signals:
@@ -152,41 +169,42 @@ def main():
                 x=time_axis,
                 y=main_signal,
                 name='Signal',
-                marker = {'color' : '#5885AF'}
+                marker = {'color' : '#5885AF'},
+                visible=show_main_signal
             )
             sampling_point_trace = go.Scatter(
                 x=sampling_points[0],
                 y=sampling_points[1],
                 mode='markers',
                 name='Sample Points',
-                marker = {'color' : 'red',"size":10}
+                marker = {'color' : 'red',"size":10},
+                visible=show_samples
             )
             reconstruct_signal = go.Scatter(
                     x=time_axis,
                     y=helper.reconstruction(time_axis, sampling_points[0], sampling_points[1]),
                     name="Reconstructed Signal",
-                    marker = {'color' : 'orange'}
+                    marker = {'color' : 'orange'},
+                    visible=show_reconstructed
                 )
             ###______________Graph Displaying _________________________###
             data = [main_signal_trace,reconstruct_signal,sampling_point_trace]
-            layout = go.Layout( margin=go.layout.Margin(l=0,r=0, b=0, t=0,),xaxis={'title': 'Time(Sec)',"fixedrange": True}, yaxis={'title': 'Amplitude(Volt)',"fixedrange": True})
+            layout = go.Layout( margin=go.layout.Margin(l=0,r=0, b=0, t=70,),xaxis={'title': 'Time(Sec)',"fixedrange": True}, yaxis={'title': 'Amplitude(mV)',"fixedrange": True})
             fig = go.Figure(data=data, layout=layout)
-            fig.update_layout(width=500,height=600,legend=dict(orientation= "h",yanchor="bottom",y=1.02,xanchor="right",x=1 ))
+            fig.update_layout(width=500,height=650,legend=dict(orientation= "h",yanchor="bottom",y=1.02,xanchor="right",x=1 ))
             fig.update_xaxes(zerolinecolor="black")
             fig.update_yaxes(zerolinecolor="black")
             st.plotly_chart(fig, use_container_width=True)
-
+        
             ###_____________________Reconstructed signal download logic _________________________###
 
-            reconstructed_signal={
-                "X": time_axis,
-                "Y": helper.reconstruction(time_axis, sampling_points[0], sampling_points[1]),
-                "fmax": sampling_frequency/2 if sampling_frequency/2<=st.session_state['max_frequency'] else st.session_state['max_frequency']
-
-            }
-            signal_dataframe=pd.DataFrame(reconstructed_signal)
-        col1,col2 =st.columns([10,2])
-        with col2:
+        reconstructed_signal={
+            "X": time_axis,
+            "Y": helper.reconstruction(time_axis, sampling_points[0], sampling_points[1]),
+            "fmax": sampling_frequency/2 if sampling_frequency/2<=st.session_state['max_frequency'] else st.session_state['max_frequency']
+        }
+        signal_dataframe=pd.DataFrame(reconstructed_signal)
+        with data_col:
             save_signals_btn = st.download_button(
                         label="Download",
                         file_name="signal.csv",

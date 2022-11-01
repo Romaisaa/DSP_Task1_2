@@ -36,11 +36,11 @@ def reconstruction(time_axis, x_sampled, sample_rate):
     if scalar:
         time_axis = np.array(time_axis)
         time_axis.resize(1)
-    u = np.resize(time_axis, (len(x_sampled), len(time_axis)))
+    resized_time_array= np.resize(time_axis, (len(x_sampled), len(time_axis)))
 
-    v = (x_sampled - u.T) / (x_sampled[1] - x_sampled[0])
-    m = sample_rate * np.sinc(v)
-    sample_rate_at_x = np.sum(m, axis=1)
+    sinc_paramter = (x_sampled - resized_time_array.T) / (x_sampled[1] - x_sampled[0])
+    value_at_one_point= sample_rate * np.sinc(sinc_paramter)
+    reconstructed_signal = np.sum(value_at_one_point, axis=1)
     if scalar:
-        return float(sample_rate_at_x)
-    return sample_rate_at_x
+        return float(reconstructed_signal)
+    return reconstructed_signal
